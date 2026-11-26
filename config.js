@@ -1,0 +1,2 @@
+// Public values only (the anon key is meant to be public; access is enforced by database rules).
+window.RIWAQ = { SUPABASE_URL: "https://gjpnksqhbtgtnuncybti.supabase.co", SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdqcG5rc3FoYnRndG51bmN5YnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU3MDUwMDgsImV4cCI6MjExMTI4MTAwOH0.T4cZ1XfkQpZDSoqUoyoQ8h87NFErJigKan7rmnj1zLc" };

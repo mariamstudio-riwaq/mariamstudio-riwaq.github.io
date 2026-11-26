@@ -1,0 +1,44 @@
+:root { --page:#fdfbf8; --ink:#2a1a1d; --ink2:#7a6a6c; --burg:#7a1c2b; --burg2:#5e1420; --gold:#b8975a; --gold2:#d9c38f; --hair:#e8dfd0; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin:0; background:var(--page); color:var(--ink); font-family: "Noto Naskh Arabic","Geeza Pro","Segoe UI",Tahoma,system-ui,sans-serif; font-size:16px; line-height:1.6; }
+#app { max-width: 720px; margin: 0 auto; padding: max(12px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:12px; }
+a { color: inherit; text-decoration: none; }
+.appbar { position:relative; border-radius:18px; overflow:hidden; background-size:cover; background-position:center; min-height:84px; display:flex; align-items:flex-end; border:1px solid var(--gold); }
+.shade { position:absolute; inset:0; background:linear-gradient(180deg, rgba(60,8,16,.35), rgba(60,8,16,.82)); }
+.appbar-text { position:relative; display:flex; flex-direction:column; gap:2px; padding:16px 18px; color:#fff7e6; }
+.appbar-name { font-size:22px; font-weight:700; color:#f3dcae; }
+.appbar-sub { font-size:13px; opacity:.9; }
+.tabbar { display:flex; gap:6px; margin:10px 0 4px; padding:4px; border-radius:999px; background:#fff; border:1px solid var(--gold2); }
+.tab { flex:1; min-height:44px; display:flex; align-items:center; justify-content:center; border-radius:999px; color:var(--burg); font-weight:600; font-size:14px; }
+.tab.active { background:var(--burg); color:#f8e9c8; }
+h1 { font-size:26px; font-weight:400; margin:6px 0 0; }
+.fact { color:var(--ink2); font-size:14px; margin:0; }
+.note { margin:0; font-size:13px; color:var(--ink2); text-align:center; }
+.search { width:100%; min-height:48px; padding:10px 16px; font:inherit; border:1px solid var(--gold2); border-radius:14px; background:#fff; color:var(--ink); }
+.label { font-size:13px; color:var(--ink2); }
+.stages { display:grid; gap:12px; }
+.stage { position:relative; overflow:hidden; display:flex; flex-direction:column; gap:6px; padding:18px 56px 18px 16px; border:1px solid var(--gold); border-radius:16px; background:#fff; min-height:64px; }
+.stage-edge { position:absolute; top:0; bottom:0; right:0; width:40px; height:100%; object-fit:cover; }
+.stage-name { font-weight:700; color:#6b1a26; }
+.stage-desc { color:var(--ink2); }
+.row { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px 16px; min-height:44px; margin-bottom:10px; border:1px solid var(--gold2); border-radius:14px; background:#fff; }
+.row-name { color:var(--burg2); font-weight:600; }
+.row-detail { display:block; color:var(--ink2); font-size:12px; }
+.chev { color:var(--gold); font-size:22px; line-height:1; }
+.back { display:inline-flex; align-items:center; gap:6px; min-height:44px; color:var(--burg); font-weight:600; }
+.chips { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { min-height:44px; padding:8px 18px; font:inherit; border:1px solid var(--hair); border-radius:12px; background:#fff; color:var(--ink); cursor:pointer; }
+.chip.on { background:#7aab9c; color:#fff; border-color:#7aab9c; }
+.item { display:block; padding:12px 16px; border:1px solid var(--gold2); border-radius:14px; background:#fff; margin-bottom:10px; }
+.item b { color:var(--burg2); }
+.item small { display:block; color:var(--ink2); direction:ltr; text-align:right; overflow-wrap:anywhere; }
+.empty { color:var(--ink2); font-size:14px; }
+.card { padding:14px; border:1px solid var(--gold2); border-radius:14px; background:#fff; display:flex; flex-direction:column; gap:10px; }
+.card input { width:100%; min-height:44px; padding:8px 12px; font:inherit; border:1px solid var(--hair); border-radius:10px; }
+.btn { min-height:44px; padding:8px 18px; font:inherit; font-weight:600; border:0; border-radius:12px; background:var(--burg); color:#f8e9c8; cursor:pointer; }
+.btn.ghost { background:#fff; color:var(--burg); border:1px solid var(--gold2); }
+.btn.small { min-height:36px; padding:4px 12px; font-size:13px; }
+.owner-row { display:flex; gap:8px; margin-top:8px; }
+.err { color:#9b1c1c; font-size:14px; margin:0; }
+.ok { color:#2a6a4a; font-size:14px; margin:0; }
+@media (min-width:768px) { .stages { grid-template-columns:repeat(3,1fr); } }

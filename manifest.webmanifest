@@ -1,0 +1,18 @@
+{
+  "name": "سَند",
+  "short_name": "سَند",
+  "description": "مكتبة دراسية لطلاب رواق الأزهر، غير تابعة للأزهر.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fdfbf8",
+  "theme_color": "#7a1c2b",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

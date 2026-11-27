@@ -49,11 +49,60 @@
     return fetch(API + path, opts).then(function (r) {
       if (r.status === 401 && auth && session) return refresh().then(function () { opts.headers = Object.assign(opts.headers, hdr(true)); return fetch(API + path, opts); });
       return r;
+  'use strict';
+  var CFG = window.RIWAQ || {};
+  var API = (CFG.SUPABASE_URL || '').replace(/\/$/, '');
+  var KEY = CFG.SUPABASE_ANON_KEY || '';
+  var KINDS = [['lectures', 'المحاضرات'], ['summaries', 'الملخصات'], ['exams', 'الامتحانات']];
+
+  // Hierarchy from the 23 Riwaq exam timetables: stage > (track, advanced only) > level > subject > (madhhab, for fiqh madhhabi only).
+  var MADH = ['حنفي', 'شافعي', 'حنبلي', 'مالكي'];
+  var LV = ['', 'المستوى الأول', 'المستوى الثاني', 'المستوى الثالث', 'المستوى الرابع'];
+  var DATA = [{"id": "s1", "name": "المرحلة التمهيدية", "levels": {"1": ["قرآن وتجويد", "فقه مذهبي", "تفسير", "نحو وصرف", "عقيدة وتصوف", "حديث"], "2": ["عقيدة وتصوف", "فقه مذهبي", "تاريخ تشريع", "نحو وصرف", "علوم قرآن", "مصطلح حديث", "سيرة"]}}, {"id": "s2", "name": "المرحلة المتوسطة", "levels": {"1": ["فقه مذهبي", "حديث", "تفسير", "عقيدة", "قرآن كريم", "أدب"], "2": ["أصول فقه", "فقه مذهبي", "فرق ومذاهب", "قضايا فكرية معاصرة", "بلاغة", "تاريخ الحضارة", "تصوف"]}}, {"id": "s3", "name": "المرحلة المتقدمة", "tracks": [{"id": "fq", "name": "شعبة الفقه", "levels": {"1": ["قرآن كريم وتجويد", "فقه مقارن", "تفسير آيات الأحكام", "أصول فقه", "عقيدة", "فقه مذهبي", "أحاديث الأحكام", "قضايا فقهية"], "2": ["فقه مذهبي", "أصول فقه", "قضايا فقهية معاصرة", "أدب المفتي والمستفتي", "تفسير آيات الأحكام", "فقه مقارن", "تصوف", "أحاديث الأحكام"], "3": ["فقه مذهبي", "فقه مقارن", "أحوال شخصية", "تفسير آيات الأحكام", "مناهج بحث فقهي", "أحاديث الأحكام", "أصول فقه", "قضايا فقهية معاصرة", "منطق"], "4": ["فقه مذهبي", "فقه المواريث", "فقه مقارن", "قواعد فقهية", "مقاصد الشريعة", "علم الاجتماع", "نحو"]}}, {"id": "aq", "name": "شعبة العقيدة", "levels": {"1": ["قرآن كريم وتجويد", "فقه مقارن", "فرق ومذاهب", "ملل ونحل", "عقيدة", "منطق", "علوم قرآن"], "2": ["عقيدة", "فلسفة", "منطق", "ملل ونحل", "سيرة", "تصوف", "فرق ومذاهب"], "3": ["منهجية الرد على الشبهات", "عقيدة", "تيارات فكرية معاصرة", "منطق", "ملل ونحل", "تفسير"], "4": ["عقيدة", "منهجية التفكير النقدي", "منطق", "ملل ونحل", "نحو", "تيارات فكرية"]}}, {"id": "tf", "name": "شعبة التفسير والحديث", "levels": {"1": ["قرآن كريم وتجويد", "علوم قرآن", "تفسير تحليلي", "فقه مقارن", "مناهج مفسرين", "عقيدة", "حديث تحليلي", "تفسير موضوعي"], "2": ["بلاغة", "شبهات حول القرآن الكريم", "حديث تحليلي", "مناهج مفسرين", "تفسير تحليلي", "تفسير موضوعي", "سيرة", "تصوف", "علوم قرآن"], "3": ["جرح وتعديل", "دفاع عن السنة", "حديث تحليلي", "مناهج محدثين", "تخريج", "مصطلح حديث", "تفسير تحليلي"], "4": ["دراسة الأسانيد", "دفاع عن السنة", "حديث تحليلي", "مناهج محدثين", "جرح وتعديل", "مصطلح حديث", "نحو", "تفسير تحليلي"]}}, {"id": "ar", "name": "شعبة اللغة العربية", "levels": {"1": ["قرآن كريم وتجويد", "صرف", "تطبيقات إعرابية", "عقيدة", "تفسير", "نحو", "أدب"], "2": ["تطبيقات إعرابية", "نحو", "صرف", "بلاغة", "أصول لغة", "أدب", "سيرة"], "3": ["تطبيقات إعرابية", "نحو", "فقه مقارن", "عروض", "بلاغة", "مناهج بحث لغوي"], "4": ["نحو وصرف", "تطبيقات إعرابية", "مناهج البحث النحوي", "بلاغة", "تصوف", "منطق"]}}, {"id": "gn", "name": "الشعبة العامة", "levels": {"1": ["فقه مذهبي", "أصول فقه", "نحو", "تفسير آيات الأحكام", "فرق ومذاهب", "علوم قرآن", "مصطلح حديث", "تجويد", "عقيدة"], "2": ["فقه مذهبي", "فقه مقارن", "حديث", "نحو", "عقيدة", "ملل ونحل", "أصول فقه", "تفسير", "علوم قرآن"], "3": ["فقه مذهبي", "حديث تحليلي", "تيارات فكرية", "عقيدة", "نحو", "بلاغة", "فقه مقارن", "قضايا فقهية معاصرة", "تفسير موضوعي"]}}]}];
+  var stageNote = { s3: 'اختاري الشعبة الأول، وبعدها المستوى.' };
+  var mkSubjects = function (pid, list) { return list.map(function (name, i) { var id = pid + '-s' + i; var n = { id: id, name: name, subject: true }; if (name === 'فقه مذهبي') n.children = MADH.map(function (m, j) { return { id: id + '-m' + j, name: m, subject: true }; }); return n; }); };
+  var mkLevels = function (pid, levels) { return Object.keys(levels).map(function (k) { return { id: pid + '-l' + k, name: LV[+k], children: mkSubjects(pid + '-l' + k, levels[k]) }; }); };
+  var stages = DATA.map(function (s) {
+    var o = { id: s.id, name: s.name };
+    o.children = s.tracks ? s.tracks.map(function (t) { return { id: s.id + '-' + t.id, name: t.name, children: mkLevels(s.id + '-' + t.id, t.levels) }; }) : mkLevels(s.id, s.levels);
+    return o;
+  });
+  var all = [], byId = {};
+  stages.forEach(function (s) { (function walk(n, p) { n.parent = p; all.push(n); byId[n.id] = n; (n.children || []).forEach(function (c) { walk(c, n); }); })(s, null); });
+  var crumb = function (n) { var o = []; for (var p = n.parent; p; p = p.parent) o.push(p.name); return o.join(' · '); };
+  var searchable = all.filter(function (n) { return n.subject; });
+
+  function h(tag, attrs) {
+    var e = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) {
+      var v = attrs[k];
+      if (k === 'class') e.className = v; else if (k === 'text') e.textContent = v; else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), v); else if (v !== false && v != null) e.setAttribute(k, v);
+    });
+    for (var i = 2; i < arguments.length; i++) { var c = arguments[i]; if (c == null) continue; e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); }
+    return e;
+  }
+
+  // ---- data (Supabase REST; readers need no account) ----
+  var session = null;
+  try { session = JSON.parse(localStorage.getItem('riwaq.session') || 'null'); } catch (e) {}
+  function saveSession(s) { session = s; try { if (s) localStorage.setItem('riwaq.session', JSON.stringify(s)); else localStorage.removeItem('riwaq.session'); } catch (e) {} }
+  function enabled() { return !!(API && KEY); }
+  function hdr(auth) { var x = { apikey: KEY, 'Content-Type': 'application/json' }; x.Authorization = 'Bearer ' + (auth && session ? session.access_token : KEY); return x; }
+  function refresh() {
+    if (!session || !session.refresh_token) return Promise.reject(new Error('no session'));
+    return fetch(API + '/auth/v1/token?grant_type=refresh_token', { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ refresh_token: session.refresh_token }) })
+      .then(function (r) { if (!r.ok) throw new Error('expired'); return r.json(); }).then(function (j) { saveSession(j); });
+  }
+  function call(path, opts, auth) {
+    opts = opts || {}; opts.headers = Object.assign(hdr(auth), opts.headers || {});
+    return fetch(API + path, opts).then(function (r) {
+      if (r.status === 401 && auth && session) return refresh().then(function () { opts.headers = Object.assign(opts.headers, hdr(true)); return fetch(API + path, opts); });
+      return r;
     });
   }
   var cache = {};
   function loadItems(subjectId, kind) {
-    if (!enabled()) return Promise.reject(new Error('not configured'));
+    if (!enabled()) return Promise.resolve([]);
     return call('/rest/v1/materials?subject_id=eq.' + encodeURIComponent(subjectId) + '&kind=eq.' + kind + '&select=id,title,detail,url,created_at&order=created_at.asc', {}, false)
       .then(function (r) { if (!r.ok) throw new Error('load'); return r.json(); });
   }

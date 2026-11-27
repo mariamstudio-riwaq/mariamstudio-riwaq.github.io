@@ -5,56 +5,6 @@
   var KEY = CFG.SUPABASE_ANON_KEY || '';
   var KINDS = [['lectures', 'المحاضرات'], ['summaries', 'الملخصات'], ['exams', 'الامتحانات']];
 
-  // Hierarchy: from Mariam's original message (spelling kept as she wrote it).
-  var madhhabs = function (id) { return ['فقة حنفي', 'فقة شافي', 'فقة حنبلي', 'فقة مالكي'].map(function (n, i) { return { id: id + '-m' + i, name: n }; }); };
-  var subj = function (id, name, fiqh) { return { id: id, name: name, children: fiqh ? madhhabs(id) : undefined }; };
-  var levelSubjects = function (n, hist) { return [subj('l' + n + '-a', 'العقيدة'), subj('l' + n + '-t', 'التفسير'), subj('l' + n + '-h', 'الحديث'), subj('l' + n + '-f', 'الفقه', true), subj('l' + n + '-s', hist), subj('l' + n + '-ar', 'اللغة العربية')]; };
-  var levelNames = ['', 'المستوى الأول', 'المستوى الثاني', 'المستوى الثالث', 'المستوى الرابع', 'المستوى الخامس', 'المستوى السادس'];
-  var specialties = function (n) { return [subj('l' + n + '-sp0', 'تخصص العقيدة'), subj('l' + n + '-sp1', 'تخصص التفسير والحديث'), subj('l' + n + '-sp2', 'تخصص الفقه وأصوله', true), subj('l' + n + '-sp3', 'تخصص اللغة العربية')]; };
-  var lvl = function (n, ch) { return { id: 'l' + n, name: levelNames[n], children: ch }; };
-  var stages = [
-    { id: 's1', name: 'المرحلة التمهيدية', children: [lvl(1, levelSubjects(1, 'السيرة النبوية')), lvl(2, levelSubjects(2, 'السيرة النبوية'))] },
-    { id: 's2', name: 'المرحلة المتوسطة', children: [lvl(3, levelSubjects(3, 'السيرة والتاريخ')), lvl(4, levelSubjects(4, 'السيرة والتاريخ'))] },
-    { id: 's3', name: 'المرحلة التخصصية', children: [lvl(5, specialties(5)), lvl(6, specialties(6))] }
-  ];
-  var stageNote = { s3: 'بيتم اختيار مسار واحد فقط من التخصصات' };
-  var all = [], byId = {};
-  stages.forEach(function (s) { (function walk(n, p) { n.parent = p; all.push(n); byId[n.id] = n; (n.children || []).forEach(function (c) { walk(c, n); }); })(s, null); });
-  var crumb = function (n) { var o = []; for (var p = n.parent; p; p = p.parent) o.push(p.name); return o.join(' · '); };
-  var searchable = all.filter(function (n) { return n.parent && n.parent.parent; });
-
-  function h(tag, attrs) {
-    var e = document.createElement(tag);
-    Object.keys(attrs || {}).forEach(function (k) {
-      var v = attrs[k];
-      if (k === 'class') e.className = v; else if (k === 'text') e.textContent = v; else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), v); else if (v !== false && v != null) e.setAttribute(k, v);
-    });
-    for (var i = 2; i < arguments.length; i++) { var c = arguments[i]; if (c == null) continue; e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); }
-    return e;
-  }
-
-  // ---- data (Supabase REST; readers need no account) ----
-  var session = null;
-  try { session = JSON.parse(localStorage.getItem('riwaq.session') || 'null'); } catch (e) {}
-  function saveSession(s) { session = s; try { if (s) localStorage.setItem('riwaq.session', JSON.stringify(s)); else localStorage.removeItem('riwaq.session'); } catch (e) {} }
-  function enabled() { return !!(API && KEY); }
-  function hdr(auth) { var x = { apikey: KEY, 'Content-Type': 'application/json' }; x.Authorization = 'Bearer ' + (auth && session ? session.access_token : KEY); return x; }
-  function refresh() {
-    if (!session || !session.refresh_token) return Promise.reject(new Error('no session'));
-    return fetch(API + '/auth/v1/token?grant_type=refresh_token', { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ refresh_token: session.refresh_token }) })
-      .then(function (r) { if (!r.ok) throw new Error('expired'); return r.json(); }).then(function (j) { saveSession(j); });
-  }
-  function call(path, opts, auth) {
-    opts = opts || {}; opts.headers = Object.assign(hdr(auth), opts.headers || {});
-    return fetch(API + path, opts).then(function (r) {
-      if (r.status === 401 && auth && session) return refresh().then(function () { opts.headers = Object.assign(opts.headers, hdr(true)); return fetch(API + path, opts); });
-      return r;
-  'use strict';
-  var CFG = window.RIWAQ || {};
-  var API = (CFG.SUPABASE_URL || '').replace(/\/$/, '');
-  var KEY = CFG.SUPABASE_ANON_KEY || '';
-  var KINDS = [['lectures', 'المحاضرات'], ['summaries', 'الملخصات'], ['exams', 'الامتحانات']];
-
   // Hierarchy from the 23 Riwaq exam timetables: stage > (track, advanced only) > level > subject > (madhhab, for fiqh madhhabi only).
   var MADH = ['حنفي', 'شافعي', 'حنبلي', 'مالكي'];
   var LV = ['', 'المستوى الأول', 'المستوى الثاني', 'المستوى الثالث', 'المستوى الرابع'];
